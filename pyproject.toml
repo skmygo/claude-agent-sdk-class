@@ -1,0 +1,9 @@
+[project]
+name = "claude-agent-class"
+version = "0.1.0"
+description = "Claude Agent SDK (Python) 教學系列 — 一個觀念一個資料夾，由淺入深"
+requires-python = ">=3.10"
+dependencies = [
+    "claude-agent-sdk>=0.2.89",
+    "anyio>=4.0",
+]
