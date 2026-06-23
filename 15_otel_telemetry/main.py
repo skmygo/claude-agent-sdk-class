@@ -38,6 +38,7 @@ async def main():
     # 提示：手邊沒有 OTLP collector 想先看效果？
     # 把 OTEL_METRICS_EXPORTER / OTEL_LOGS_EXPORTER 改成 "console"，指標會直接印到終端機。
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         env=OTEL_ENV,                 # ← 關鍵：用 env 把遙測設定注入子程序
         allowed_tools=["Read", "Glob"],
     )

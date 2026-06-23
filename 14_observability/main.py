@@ -33,6 +33,7 @@ def stderr_logger(line: str) -> None:
 
 async def main():
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         allowed_tools=["Read", "Glob"],
         stderr=stderr_logger,   # 攔截 CLI 的 stderr
     )

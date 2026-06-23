@@ -41,11 +41,13 @@ async def main():
     math_server = create_sdk_mcp_server(name="math", tools=[add])
 
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         # 1) 先在全域定義所有 server
         mcp_servers={"weather": weather_server, "math": math_server},
         agents={
             # 2) 天氣助手「只」掛 weather
             "weather-bot": AgentDefinition(
+                model="claude-haiku-4-5",
                 description="回答天氣問題。",
                 prompt="你只負責天氣，用 weather 工具查。",
                 mcpServers=["weather"],                    # camelCase，引用全域 server 名
@@ -53,17 +55,25 @@ async def main():
             ),
             # 數學助手「只」掛 math
             "math-bot": AgentDefinition(
+                model="claude-haiku-4-5",
                 description="負責算數。",
                 prompt="你只負責計算，用 math 工具算。",
                 mcpServers=["math"],
                 tools=["mcp__math__add"],
             ),
         },
-        allowed_tools=["Agent"],
+        allowed_tools=[
+            "Agent",
+            # 子代理要呼叫的 MCP 工具也要在這裡預先放行（同第 05 課），
+            # 否則非互動模式下會卡在等待權限。
+            "mcp__weather__get_weather",
+            "mcp__math__add",
+        ],
+        setting_sources=[],   # 跑成範例：不吃使用者全域設定 / 上層 CLAUDE.md
     )
 
     async for message in query(
-        prompt="叫 weather-bot 查台北天氣，再叫 math-bot 算 12 + 30。",
+        prompt="叫 weather-bot 查台北天氣，再叫 math-bot 算 12 + 30。直接執行，不要反問。",
         options=options,
     ):
         if isinstance(message, AssistantMessage):

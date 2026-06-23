@@ -62,6 +62,7 @@ async def review_output(input_data, tool_use_id, context):
 
 async def main():
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         allowed_tools=["Bash"],
         hooks={
             # matcher 篩工具名，支援 regex（例如 "Edit|Write"）；matcher=None 代表全部

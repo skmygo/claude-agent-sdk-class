@@ -17,12 +17,12 @@ from pathlib import Path
 from claude_agent_sdk import (
     AssistantMessage,
     ClaudeAgentOptions,
+    ClaudeSDKClient,
     PermissionResultAllow,
     PermissionResultDeny,
     ResultMessage,
     TextBlock,
     ToolPermissionContext,
-    query,
 )
 
 # 沙箱根目錄：agent 只能在這裡面活動
@@ -34,7 +34,9 @@ async def confine_to_sandbox(tool_name, tool_input, context: ToolPermissionConte
     if tool_name in {"Write", "Edit"}:
         target = Path(tool_input.get("file_path", "")).resolve()
         if not str(target).startswith(str(SANDBOX)):
+            print(f"  🛑 擋下：路徑超出沙箱 → {target}")
             return PermissionResultDeny(message=f"路徑超出沙箱：{target}")
+        print(f"  ✅ 放行：沙箱內寫入 → {target}")
     return PermissionResultAllow()
 
 
@@ -42,23 +44,28 @@ async def main():
     SANDBOX.mkdir(exist_ok=True)
 
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         cwd=str(SANDBOX),                  # 1) 把「家」設在沙箱
-        allowed_tools=["Read", "Write", "Glob"],
+        # 注意：Write 故意「不」放進 allowed_tools！白名單裡的工具會被「預先放行」、
+        # 直接略過 can_use_tool；要讓沙箱守衛真的審查寫檔，Write 就不能在白名單裡。
+        allowed_tools=["Read", "Glob"],
         disallowed_tools=["Bash"],         # 2) 完全禁止跑 shell（snake_case！）
         permission_mode="default",         # 3) 標準把關，讓 can_use_tool 生效
         can_use_tool=confine_to_sandbox,   # 4) 執行時逐一審查路徑
+        setting_sources=[],                # 5) 跑成範例：不吃使用者全域設定 / 上層 CLAUDE.md
     )
 
-    async for message in query(
-        prompt="在目前資料夾建立 notes.txt，內容寫 'hello sandbox'。",
-        options=options,
-    ):
-        if isinstance(message, AssistantMessage):
-            for block in message.content:
-                if isinstance(block, TextBlock):
-                    print(f"Claude: {block.text}")
-        elif isinstance(message, ResultMessage):
-            print(f"[結束] 成本 ${message.total_cost_usd or 0:.4f}")
+    # can_use_tool 需要 streaming 模式 → 用 ClaudeSDKClient（同第 04 課），
+    # 不能用 query() + 字串 prompt（會報 "requires streaming mode"）。
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query("在目前資料夾建立 notes.txt，內容寫 'hello sandbox'。")
+        async for message in client.receive_response():
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        print(f"Claude: {block.text}")
+            elif isinstance(message, ResultMessage):
+                print(f"[結束] 成本 ${message.total_cost_usd or 0:.4f}")
 
 
 if __name__ == "__main__":

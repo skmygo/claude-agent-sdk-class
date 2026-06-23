@@ -36,7 +36,7 @@ async def main():
     print("=== 第一輪：埋一個記憶點 ===")
     async for message in query(
         prompt="我的幸運數字是 7，請記住它。",
-        options=ClaudeAgentOptions(max_turns=1),
+        options=ClaudeAgentOptions(model="claude-haiku-4-5", max_turns=1),
     ):
         if isinstance(message, SystemMessage) and message.subtype == "init":
             session_id = message.data["session_id"]   # ← 關鍵：開場那則就有
@@ -48,7 +48,7 @@ async def main():
     print("\n=== 第二輪：resume 續談 ===")
     async for message in query(
         prompt="我的幸運數字是多少？",
-        options=ClaudeAgentOptions(resume=session_id, max_turns=1),
+        options=ClaudeAgentOptions(model="claude-haiku-4-5", resume=session_id, max_turns=1),
     ):
         print_text(message)
 
@@ -56,7 +56,7 @@ async def main():
     print("\n=== 分叉：fork_session 開一條平行支線 ===")
     async for message in query(
         prompt="在這條支線把幸運數字改成 42，原本那條不要動。",
-        options=ClaudeAgentOptions(resume=session_id, fork_session=True, max_turns=1),
+        options=ClaudeAgentOptions(model="claude-haiku-4-5", resume=session_id, fork_session=True, max_turns=1),
     ):
         print_text(message)
 

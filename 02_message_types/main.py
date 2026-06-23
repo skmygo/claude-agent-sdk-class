@@ -62,7 +62,7 @@ def show(message) -> None:
 
 async def main():
     # 開放 Bash 工具，Claude 才會真的去呼叫工具，我們也才看得到 tool_use / tool_result
-    options = ClaudeAgentOptions(allowed_tools=["Bash"])
+    options = ClaudeAgentOptions(model="claude-haiku-4-5", allowed_tools=["Bash"])
 
     async for message in query(
         prompt="用一行 bash 指令印出今天的日期，然後告訴我結果",

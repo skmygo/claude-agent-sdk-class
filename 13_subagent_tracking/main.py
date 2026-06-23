@@ -42,14 +42,17 @@ def who(message) -> str:
 
 async def main():
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         agents={
             "researcher": AgentDefinition(
+                model="claude-haiku-4-5",
                 description="調查並摘要某個主題。",
                 prompt="你是研究員，簡潔摘要重點。",
                 tools=["Read", "Grep", "Glob"],
             ),
         },
         allowed_tools=["Read", "Grep", "Glob", "Agent"],
+        setting_sources=[],   # 跑成範例：不吃使用者全域設定 / 上層 CLAUDE.md
         hooks={
             # 非工具事件，matcher 省略（= None，不篩）
             "SubagentStart": [HookMatcher(hooks=[on_subagent_start])],
@@ -58,7 +61,7 @@ async def main():
     )
 
     async for message in query(
-        prompt="叫 researcher 子代理看看這個資料夾在教什麼，回報主題。",
+        prompt="叫 researcher 子代理讀目前資料夾的 main.py（就在 ./main.py），直接開始、不要反問路徑，回報這個範例在教什麼主題。",
         options=options,
     ):
         if isinstance(message, AssistantMessage):

@@ -32,16 +32,19 @@ async def run(title: str, options: ClaudeAgentOptions, prompt="用一句話說�
 async def main():
     # 1) 字串 system_prompt：最直接的人設
     await run("字串人設", ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         system_prompt="你是個海盜，講話要像海盜。",
     ))
 
     # 2) preset：沿用 Claude Code 內建的完整系統提示（含內建工具的使用守則）
     await run("preset = claude_code", ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         system_prompt={"type": "preset", "preset": "claude_code"},
     ))
 
     # 3) preset + append：用內建提示，再追加自己的規則
     await run("preset + append", ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         system_prompt={
             "type": "preset",
             "preset": "claude_code",

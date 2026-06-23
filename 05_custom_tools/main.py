@@ -53,11 +53,13 @@ async def main():
     )
 
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         mcp_servers={"toolbox": toolbox},   # "toolbox" 是掛載名 → 影響工具全名
         allowed_tools=[                      # 用全名預先放行
             "mcp__toolbox__get_weather",
             "mcp__toolbox__add",
         ],
+        setting_sources=[],   # 跑成範例：不吃使用者全域設定（避免一堆外部 MCP 工具干擾選用）
     )
 
     async with ClaudeSDKClient(options=options) as client:

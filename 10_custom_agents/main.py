@@ -22,26 +22,28 @@ from claude_agent_sdk import (
 
 async def main():
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         agents={
             "code-reviewer": AgentDefinition(
                 description="審查程式碼品質與安全性的專家。需要 review 程式時叫它。",
                 prompt="你是資深 code reviewer。找出 bug、效能與安全問題，給具體可行的建議。",
                 tools=["Read", "Grep", "Glob"],   # 只給唯讀工具：reviewer 不該改檔
-                model="sonnet",
+                model="claude-haiku-4-5",
             ),
             "doc-writer": AgentDefinition(
                 description="撰寫技術文件的專家。需要寫 README / docstring 時叫它。",
                 prompt="你是技術文件專家，文字清楚、善用範例。",
                 tools=["Read", "Write", "Edit"],
-                model="sonnet",
+                model="claude-haiku-4-5",
             ),
         },
         # 主 agent 自己的工具 + Agent（沒有 Agent 就無法委派）
         allowed_tools=["Read", "Grep", "Glob", "Agent"],
+        setting_sources=[],   # 跑成範例：不吃使用者全域設定 / 上層 CLAUDE.md
     )
 
     async for message in query(
-        prompt="用 code-reviewer 子代理檢視這個資料夾的 main.py，回報你發現的問題。",
+        prompt="用 code-reviewer 子代理檢視目前資料夾的 main.py（就在 ./main.py），直接開始、不要反問路徑，回報你發現的問題。",
         options=options,
     ):
         if isinstance(message, AssistantMessage):

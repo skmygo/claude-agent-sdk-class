@@ -32,6 +32,7 @@ HERE = Path(__file__).parent
 
 async def main():
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         cwd=str(HERE),
         # None（不設）= 載入全部預設來源；[] = 完全不載入；這裡只載入專案層級
         setting_sources=["project"],

@@ -52,6 +52,7 @@ async def main():
     store = InMemorySessionStore()
 
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         allowed_tools=["Read", "Glob"],
         session_store=store,                       # 自訂 session 持久化後端
         hooks={

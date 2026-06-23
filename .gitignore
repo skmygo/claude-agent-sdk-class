@@ -20,4 +20,5 @@ hello.py
 hello.txt
 audit.log
 safe_output/
+sandbox/
 *.sessions.json

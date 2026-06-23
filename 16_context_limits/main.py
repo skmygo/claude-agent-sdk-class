@@ -22,37 +22,43 @@ from claude_agent_sdk import (
 
 async def run(title: str, options: ClaudeAgentOptions, prompt: str):
     print(f"\n=== {title} ===")
-    async for message in query(prompt=prompt, options=options):
-        if isinstance(message, AssistantMessage):
-            for block in message.content:
-                if isinstance(block, TextBlock):
-                    print(f"Claude: {block.text}")
-        elif isinstance(message, ResultMessage):
-            print(f"[結束] subtype={message.subtype}  "
-                  f"成本 ${message.total_cost_usd or 0:.4f}  回合 {message.num_turns}")
-            if message.subtype == "error_max_budget_usd":
-                print("⚠️  觸發預算上限，提前停止（成本可能略超，因為以「整次 API 呼叫」為單位結算）")
+    # 注意（SDK 0.2.x 行為）：碰到「錯誤結尾」(max_turns / max_budget) 時，SDK 會先
+    # 吐出帶該 subtype 的 ResultMessage，緊接著「再丟一個 Exception」收尾。用 try 把這個
+    # 收尾例外接住，後面的示範才不會被中斷。
+    try:
+        async for message in query(prompt=prompt, options=options):
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        print(f"Claude: {block.text}")
+            elif isinstance(message, ResultMessage):
+                print(f"[結束] subtype={message.subtype}  "
+                      f"成本 ${message.total_cost_usd or 0:.4f}  回合 {message.num_turns}")
+                if message.subtype == "error_max_budget_usd":
+                    print("⚠️  觸發預算上限，提前停止（成本可能略超，因為以「整次 API 呼叫」為單位結算）")
+    except Exception as e:
+        print(f"[收尾例外，已接住] {e}")
 
 
 async def main():
     # 1) max_turns：限制來回次數，避免 agent 在工具迴圈裡打轉
     await run(
         "max_turns=2",
-        ClaudeAgentOptions(allowed_tools=["Read", "Glob", "Bash"], max_turns=2),
+        ClaudeAgentOptions(model="claude-haiku-4-5", allowed_tools=["Read", "Glob", "Bash"], max_turns=2),
         "統計這個資料夾各副檔名各有幾個檔案。",
     )
 
     # 2) max_budget_usd：花費上限。給一個很緊的預算讓它提前觸發
     await run(
         "max_budget_usd=0.001（故意調很低）",
-        ClaudeAgentOptions(allowed_tools=["Read", "Glob"], max_budget_usd=0.001),
+        ClaudeAgentOptions(model="claude-haiku-4-5", allowed_tools=["Read", "Glob"], max_budget_usd=0.001),
         "逐一讀完整個資料夾每個檔案，寫一份非常詳盡的導讀。",
     )
 
     # 3) betas：開啟 1M token 超長上下文（處理大型程式庫 / 長文件時）
     await run(
         "1M 超長上下文",
-        ClaudeAgentOptions(betas=["context-1m-2025-08-07"], max_turns=1),
+        ClaudeAgentOptions(model="claude-haiku-4-5", betas=["context-1m-2025-08-07"], max_turns=1),
         "用一句話自我介紹。",
     )
 

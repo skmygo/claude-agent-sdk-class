@@ -20,6 +20,7 @@ async def main():
     # query() 回傳一個 async 迭代器：對話過程中的每一則訊息都會被「吐」出來。
     # options 可省略（連 system_prompt 都不給也能跑）；這裡示範兩個常用選項。
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         system_prompt="You are a helpful assistant. Answer in one sentence.",
         max_turns=1,  # 這題不需要工具，限制 1 輪避免多餘往返
     )

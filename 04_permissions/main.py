@@ -66,6 +66,7 @@ async def gatekeeper(
 
 async def main():
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         can_use_tool=gatekeeper,
         permission_mode="default",  # 必須用 default，callback 才會被呼叫
     )

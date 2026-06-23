@@ -33,6 +33,7 @@ def text_delta(event: dict) -> str:
 
 async def main():
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         include_partial_messages=True,  # ← 關鍵開關：打開後才會收到 StreamEvent
         max_turns=1,
     )

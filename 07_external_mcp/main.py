@@ -25,6 +25,7 @@ from claude_agent_sdk import (
 
 async def main():
     options = ClaudeAgentOptions(
+        model="claude-haiku-4-5",
         mcp_servers={
             # stdio：npx 啟動官方 filesystem MCP，最後的 "." 限定它只能碰目前資料夾
             "fs": {
@@ -41,8 +42,12 @@ async def main():
         allowed_tools=[
             "mcp__fs__list_directory",
             "mcp__fs__read_file",
+            "mcp__fs__read_text_file",
         ],
-        max_turns=3,
+        # 跑成範例：不載入外部設定（避免吃到使用者全域 MCP / 上層 CLAUDE.md），
+        # 並給足回合數，讓 npx 啟動伺服器 + 列檔 + 讀檔 + 摘要能跑完。
+        setting_sources=[],
+        max_turns=6,
     )
 
     async for message in query(
